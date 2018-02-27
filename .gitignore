@@ -1,0 +1,7 @@
+dep/
+main
+.directory
+*.o
+*.jpg
+*.png
+tags
