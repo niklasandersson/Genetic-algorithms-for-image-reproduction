@@ -30,7 +30,7 @@ OBJDIR = obj
 DEPDIR = dep
 
 # Specify compiler flags.
-CXXFLAGS = -c -std=c++11 -pedantic -Wall -Wextra $(INCDIR)
+CXXFLAGS = -c -g -std=c++11 -pedantic -Wall -Wextra $(INCDIR)
 
 # Specify more compiler flags. MMD and MP for dependency generation.
 CPPFLAGS = -MMD -MP

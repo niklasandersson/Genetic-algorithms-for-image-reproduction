@@ -34,14 +34,11 @@ class Shader {
     bool har_fragment_shader;
     bool has_compute_shader;
 
-    GLuint program_id_;
-    GLuint vertex_id_;
-    GLuint fragment_id_;
-    GLuint compute_id_;
+    GLuint ids[4];
 };
 
 inline GLuint Shader::GetProgram() const {
-  return program_id_;
+  return ids[0];
 }
 
 #endif /* SHADER_H */

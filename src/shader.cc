@@ -4,20 +4,20 @@ Shader::Shader() :
   is_linked_(false),
   has_vertex_shader_(false),
   har_fragment_shader(false),
-  has_compute_shader(false),
-  vertex_id_(0),
-  fragment_id_(0),
-  compute_id_(0) {
+  has_compute_shader(false) {
 
-  program_id_ = glCreateProgram();
+  ids[0] = glCreateProgram();
+}
+
+Shader::~Shader() {
+
 }
 
 void Shader::CompileSourceFile(const std::string& file_path, TYPE type) {
-  GLuint id;
   switch (type) {
-    case VERTEX: id = glCreateShader(GL_VERTEX_SHADER); break;
-    case FRAGMENT: id = glCreateShader(GL_FRAGMENT_SHADER); break;
-    case COMPUTE: id = glCreateShader(GL_COMPUTE_SHADER); break;
+    case VERTEX: ids[1] = glCreateShader(GL_VERTEX_SHADER); break;
+    case FRAGMENT: ids[2] = glCreateShader(GL_FRAGMENT_SHADER); break;
+    case COMPUTE: ids[3] = glCreateShader(GL_COMPUTE_SHADER); break;
   }
 
   std::string source;
@@ -34,18 +34,39 @@ void Shader::CompileSourceFile(const std::string& file_path, TYPE type) {
   }
 
   const char* char_source = source.c_str();
-  glShaderSource(id, 1, &char_source, NULL);
-  glCompileShader(id);
+  switch (type) {
+    case VERTEX: glShaderSource(ids[1], 1, &char_source, NULL);
+                 glCompileShader(ids[1]);
+                 break;
+    case FRAGMENT: glShaderSource(ids[2], 1, &char_source, NULL);
+                   glCompileShader(ids[2]);
+                   break;
+    case COMPUTE: glShaderSource(ids[3], 1, &char_source, NULL);
+                  glCompileShader(ids[3]);
+                  break;
+  }
+
 
   // Kolla så det funkade
+  /* GLint result = GL_FALSE; */
+
+  /* int log_length = 0; */
+
+  /* if (log_length > 0) { */
+  /*   std::vector<char> error_message(log_length + 1); */
+  /*   glGetShaderInfoLog(id, log_length, NULL, &error_message[0]); */
+  /*   std::cout << "Vertex Shader log:" << std::endl; */
+  /*   std::cout << std::string(&error_message[0]) << std::endl; */
+  /* } */
+
   switch (type) {
-    case VERTEX: vertex_id_ = id;
+    case VERTEX:
                  has_vertex_shader_ = true;
                  break;
-    case FRAGMENT: fragment_id_  = id;
+    case FRAGMENT:
                    har_fragment_shader = true;
                    break;
-    case COMPUTE: compute_id_ = id;
+    case COMPUTE:
                   has_compute_shader = true;
                   break;
   }
@@ -53,19 +74,19 @@ void Shader::CompileSourceFile(const std::string& file_path, TYPE type) {
 
 void Shader::Link() {
   if (!is_linked_) {
-    glLinkProgram(program_id_);
+    glLinkProgram(ids[0]);
 
     if (has_vertex_shader_) {
-      glDetachShader(program_id_, vertex_id_);
-      glDeleteShader(vertex_id_);
+      glDetachShader(ids[0], ids[1]);
+      glDeleteShader(ids[1]);
     }
     if (har_fragment_shader) {
-      glDetachShader(program_id_, fragment_id_);
-      glDeleteShader(fragment_id_);
+      glDetachShader(ids[0], ids[2]);
+      glDeleteShader(ids[2]);
     }
     if (has_compute_shader) {
-      glDetachShader(program_id_, compute_id_);
-      glDeleteShader(compute_id_);
+      glDetachShader(ids[0], ids[3]);
+      glDeleteShader(ids[3]);
     }
 
     is_linked_ = true;
