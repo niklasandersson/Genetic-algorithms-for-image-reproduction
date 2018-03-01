@@ -6,6 +6,7 @@
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 
+namespace gene {
 class Window {
 
   public:
@@ -33,4 +34,5 @@ inline GLFWwindow* Window::GetWindow() {
   return window_;
 }
 
+}
 #endif /* WINDOW_H */

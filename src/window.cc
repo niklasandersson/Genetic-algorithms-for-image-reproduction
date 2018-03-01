@@ -1,6 +1,6 @@
 #include "window.h"
 
-Window::Window(int height, int width) {
+gene::Window::Window(int height, int width) {
   if (!glfwInit()) {
     std::cout << "Could not init glfw" << std::endl;
   }
@@ -27,7 +27,7 @@ Window::Window(int height, int width) {
   glfwSetInputMode(window_, GLFW_STICKY_KEYS, GL_TRUE);
 }
 
-Window::~Window() {
+gene::Window::~Window() {
   glfwDestroyWindow(window_);
   glfwTerminate();
 }
