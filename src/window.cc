@@ -1,7 +1,9 @@
 #include "window.h"
 
 Window::Window(int height, int width) {
-  glfwInit();
+  if (!glfwInit()) {
+    std::cout << "Could not init glfw" << std::endl;
+  }
 
 	glfwWindowHint(GLFW_SAMPLES, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -11,12 +13,14 @@ Window::Window(int height, int width) {
 
 	window_ = glfwCreateWindow(height, width, " ", NULL, NULL);
   if (window_ == NULL) {
+    std::cout << "Could not create window" << std::endl;
     glfwTerminate();
   }
 
 	glfwMakeContextCurrent(window_);
-
+  glewExperimental = true;
   if (glewInit() != GLEW_OK) {
+    std::cout << "Could not init glew" << std::endl;
     glfwTerminate();
   }
 
