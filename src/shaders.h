@@ -10,5 +10,6 @@
 #include "GL/glew.h"
 
 GLuint LoadShaders(const char* vs_path, const char* fs_path);
+GLuint LoadComputeShader(const char* path);
 
 #endif /* SHADERS_H */

@@ -88,3 +88,58 @@ GLuint LoadShaders(const char* vs_path, const char* fs_path) {
 
   return program_id;
 }
+
+GLuint LoadComputeShader(const char* path) {
+  GLuint compute_shader = glCreateShader(GL_COMPUTE_SHADER);
+
+  std::string code;
+  std::ifstream stream(path);
+
+  if (stream.is_open()) {
+    std::stringstream sstream;
+    sstream << stream.rdbuf();
+    code = sstream.str();
+    stream.close();
+  } else {
+    std::cout << "Could not load compute shader" << std::endl;
+
+    return 0;
+  }
+  const char* source = code.c_str();
+  glShaderSource(compute_shader, 1, &source, NULL);
+  glCompileShader(compute_shader);
+
+  GLint result = GL_FALSE;
+
+  int log_length = 0;
+
+
+  glGetShaderiv(compute_shader, GL_COMPILE_STATUS, &result);
+  glGetShaderiv(compute_shader, GL_INFO_LOG_LENGTH, &log_length);
+
+  if (log_length > 0) {
+    std::vector<char> error_message(log_length + 1);
+    glGetShaderInfoLog(compute_shader, log_length, NULL, &error_message[0]);
+    std::cout << "Compute Shader log:" << std::endl;
+    std::cout << std::string(&error_message[0]) << std::endl;
+  }
+
+
+  GLuint program = glCreateProgram();
+  glAttachShader(program, compute_shader);
+  glLinkProgram(program);
+
+  glGetShaderiv(program, GL_COMPILE_STATUS, &result);
+  glGetShaderiv(program, GL_INFO_LOG_LENGTH, &log_length);
+
+  if (log_length > 0) {
+    std::vector<char> error_message(log_length + 1);
+    glGetShaderInfoLog(program, log_length, NULL, &error_message[0]);
+    std::cout << "Program log:" << std::endl;
+    std::cout << std::string(&error_message[0]) << std::endl;
+  }
+
+  glDeleteShader(compute_shader);
+
+  return program;
+}
