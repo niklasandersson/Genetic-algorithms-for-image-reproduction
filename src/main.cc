@@ -11,10 +11,14 @@ int image_width = 0;
 void CreateQuad();
 void DrawQuad();
 void CleanUp();
+void CreateOrigTexture(unsigned char* data);
 
 GLuint vertex_array;
 GLuint quad_buffer;
 GLuint quad_shader;
+GLuint orig_texture;
+GLuint orig_texture_location;
+
 int main(int argc, char* argv[])
 {
   std::string image_path;
@@ -25,9 +29,7 @@ int main(int argc, char* argv[])
     image_path = "img3.jpg";
   }
 
-  Image image(image_path);
-  window_height = image.GetHeight();
-  window_width = image.GetWidth() * 2;
+  Image image(image_path); window_height = image.GetHeight(); window_width = image.GetWidth() * 2;
   image_width = image.GetWidth();
   image_height = image.GetHeight();
   std::cout << "Original image: " << image_path << std::endl;
@@ -39,25 +41,16 @@ int main(int argc, char* argv[])
   glDisable(GL_CULL_FACE);
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
+  CreateOrigTexture(image.GetData());
+  orig_texture_location = glGetUniformLocation(quad_shader, "myTextureSampler");
   CreateQuad();
 
-  //Texture
-  GLuint textureID;
-  glGenTextures(1, &textureID);
-  glBindTexture(GL_TEXTURE_2D, textureID);
-  glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, image.GetWidth(), image.GetHeight(),
-               0, GL_RGB, GL_UNSIGNED_BYTE, image.GetData());
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  GLuint TextureID = glGetUniformLocation(quad_shader, "myTextureSampler");
-  //Texture end
-  //
   do {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, textureID);
-    glUniform1i(TextureID, 0);
+    glBindTexture(GL_TEXTURE_2D, orig_texture);
+    glUniform1i(orig_texture_location, 0);
 
     DrawQuad();
 
@@ -74,6 +67,7 @@ void CreateQuad() {
   vertex_array = CreateVertexArray();
   quad_buffer = CreateQuadBuffer();
   quad_shader = LoadShaders("shaders/passthrough.vs", "shaders/red.fs");
+  GLuint compute = LoadComputeShader("shaders/compute.cs");
 }
 
 void DrawQuad() {
@@ -90,4 +84,17 @@ void CleanUp() {
   glDeleteBuffers(1, &quad_buffer);
   glDeleteVertexArrays(1, &vertex_array);
   glDeleteProgram(quad_shader);
+}
+
+void CreateOrigTexture(unsigned char* data) {
+
+  GLuint texture_id;
+  glGenTextures(1, &texture_id);
+  glBindTexture(GL_TEXTURE_2D, texture_id);
+  glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, image_width, image_height,
+               0, GL_RGB, GL_UNSIGNED_BYTE, data);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+  orig_texture = texture_id;
 }
