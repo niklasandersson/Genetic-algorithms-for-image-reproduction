@@ -12,6 +12,7 @@ void CreateQuad();
 void DrawQuad();
 void CleanUp();
 void CreateOrigTexture(unsigned char* data);
+void DrawOriginalImage();
 
 GLuint vertex_array;
 GLuint quad_buffer;
@@ -48,11 +49,7 @@ int main(int argc, char* argv[])
   do {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, orig_texture);
-    glUniform1i(orig_texture_location, 0);
-
-    DrawQuad();
+    DrawOriginalImage();
 
     window.SwapBuffer();
     window.PollEvents();
@@ -97,4 +94,11 @@ void CreateOrigTexture(unsigned char* data) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
   orig_texture = texture_id;
+}
+
+void DrawOriginalImage() {
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, orig_texture);
+    glUniform1i(orig_texture_location, 0);
+    DrawQuad();
 }
