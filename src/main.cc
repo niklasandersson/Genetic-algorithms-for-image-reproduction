@@ -16,8 +16,10 @@ void CreateTriangle();
 void DrawQuad();
 void CleanUp();
 void CreateOrigTexture(unsigned char* data);
+void CreateFramebuffer();
 void DrawOriginalImage();
 void DrawCreature(int i);
+void DrawBestCreature();
 
 GLuint quad_vertex_array;
 GLuint triangle_vertex_array;
@@ -27,6 +29,8 @@ GLuint quad_shader;
 GLuint triangle_shader;
 GLuint orig_texture;
 GLuint orig_texture_location;
+GLuint framebuffer;
+GLuint framebuffer_texture;
 
 GLuint transform_location;
 GLuint color_location;
@@ -62,13 +66,14 @@ int main(int argc, char* argv[])
   orig_texture_location = glGetUniformLocation(quad_shader, "myTextureSampler");
   CreateQuad();
   CreateTriangle();
-
+  CreateFramebuffer();
 
   do {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     DrawCreature(0);
     DrawOriginalImage();
+    DrawBestCreature();
 
     window.SwapBuffer();
     window.PollEvents();
@@ -95,7 +100,6 @@ void CreateTriangle() {
 }
 
 void DrawQuad() {
-  glViewport(0,0,image_width,window_height);
   glUseProgram(quad_shader);
   glEnableVertexAttribArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, quad_buffer);
@@ -125,9 +129,43 @@ void CreateOrigTexture(unsigned char* data) {
   orig_texture = texture_id;
 }
 
+void CreateFramebuffer() {
+  GLuint framebuffer_id  = 0;
+  glGenFramebuffers(1, &framebuffer_id);
+  glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_id);
+
+  GLuint texture;
+  glGenTextures(1, &texture);
+
+  glBindTexture(GL_TEXTURE_2D, texture);
+  glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, image_width, image_height, 0,GL_RGB, GL_UNSIGNED_BYTE, 0);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+  glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture, 0);
+  GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
+  glDrawBuffers(1, DrawBuffers);
+
+  framebuffer = framebuffer_id;
+  framebuffer_texture = texture;
+}
+
 void DrawOriginalImage() {
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0,0,image_width,window_height);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, orig_texture);
+    glUniform1i(orig_texture_location, 0);
+    DrawQuad();
+}
+
+void DrawBestCreature() {
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(image_width,0,image_width,window_height);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, framebuffer_texture);
     glUniform1i(orig_texture_location, 0);
     DrawQuad();
 }
@@ -136,7 +174,8 @@ void DrawCreature(int i) {
   Gene* gene = population->GetGenes() + i;
   int number_of_genes_per_creature = population->GetNumberOfGenesPerCreature();
 
-  glViewport(image_width,0,image_width,window_height);
+  glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+  glViewport(0,0,image_width,window_height);
   glUseProgram(triangle_shader);
   glEnableVertexAttribArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, triangle_buffer);
