@@ -6,6 +6,7 @@
 #include "GL/glew.h"
 
 GLuint CreateQuadBuffer();
+GLuint CreateTriangleBuffer();
 GLuint CreateVertexArray();
 
 #endif /* UTILS_H */

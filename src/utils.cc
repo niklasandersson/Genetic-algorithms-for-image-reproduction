@@ -26,3 +26,17 @@ GLuint CreateQuadBuffer() {
   return quad_vertexbuffer;
 }
 
+GLuint CreateTriangleBuffer() {
+  static const GLfloat g_triangle_vertex_buffer_data[] = {
+    -1.0f, -1.0f, 0.0f,
+     1.0f, -1.0f, 0.0f,
+     0.0f,  1.0f, 0.0f,
+  };
+
+  GLuint triangle_vertexbuffer;
+  glGenBuffers(1, &triangle_vertexbuffer);
+  glBindBuffer(GL_ARRAY_BUFFER, triangle_vertexbuffer);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(g_triangle_vertex_buffer_data), g_triangle_vertex_buffer_data, GL_STATIC_DRAW);
+
+  return triangle_vertexbuffer;
+}

@@ -1,11 +1,13 @@
 #version 330 core
 
-out vec3 color;
-in vec2 UV;
+uniform vec3 color;
+uniform float opacity;
 
-uniform sampler2D myTextureSampler;
+out vec4 frag_color;
 
 void main()
 {
-  color = texture( myTextureSampler, UV ).rgb;
+
+	frag_color.rgb = color;
+	frag_color.a = opacity;
 }
